@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,3 +18,12 @@ Auth::routes();
 
 Route::redirect('/', '/home');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/houses', function () {
+        return view('pages/houses');
+    });
+     Route::get('/villages', function () {
+        return view('pages/villages');
+    });
+});

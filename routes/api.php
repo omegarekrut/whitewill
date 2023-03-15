@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HousesController;
+use App\Http\Controllers\VillagesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,4 +18,19 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/houses', [HousesController::class, 'index']);
+    Route::post('/houses/create', [HousesController::class, 'store']);
+    Route::post('/houses/{id}', [HousesController::class, 'update']);
+    Route::delete('/houses/{id}', [HousesController::class, 'destroy']);
+    Route::put('/houses/upload/{id}', [HousesController::class, 'upload']);
+});
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/village', [VillagesController::class, 'index']);
+    Route::post('/village/create', [VillagesController::class, 'store']);
+    Route::put('/village/{id}', [VillagesController::class, 'update']);
+    Route::delete('/village/{id}', [VillagesController::class, 'destroy']);
 });
