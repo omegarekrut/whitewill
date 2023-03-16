@@ -25,7 +25,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/houses/create', [HousesController::class, 'store']);
     Route::post('/houses/{id}', [HousesController::class, 'update']);
     Route::delete('/houses/{id}', [HousesController::class, 'destroy']);
-    Route::put('/houses/upload/{id}', [HousesController::class, 'upload']);
+    Route::post('/houses/upload/{id}', [HousesController::class, 'upload']);
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {

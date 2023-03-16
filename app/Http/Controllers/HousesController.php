@@ -28,6 +28,11 @@ class HousesController extends Controller
         // Get the updated data for the row with the given ID
         $data = $request->input('data.' . $id);
 
+        // Check if the $data variable is not null
+        if (!$data) {
+            return response()->json(['error' => 'No data provided for the specified ID'], 400);
+        }
+
         // Update the House model with the new data
         $house = House::findOrFail($id);
         $house->fill($data);

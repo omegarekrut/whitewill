@@ -48,7 +48,6 @@
 <script type="module">
     $(document).ready(function () {
         const token = "{{ csrf_token() }}";
-        var trigger
         var villages_array = [];
         $.ajax({
             type: "POST",
@@ -118,13 +117,6 @@
                 data: 'image_gallery',
                 title: 'Image Gallery',
                 orderable: false,
-                render: function ( file_id ) {
-                    return file_id ?
-                        '<img src="'+editor.file( 'files', file_id ).web_path+'"/>' :
-                        null;
-                },
-                defaultContent: "No image",
-                title: "Image"
             },
             {
                 data: 'village_id',
@@ -205,19 +197,7 @@
             {
                 label: 'Image Gallery:',
                 name: 'image_gallery',
-                type: 'upload',
-                folder: 'images/houses',
-                upload: {
-                    type: 'PUT',
-                    url: function (data) {
-                        console.log(data.id);
-                        return '/api/houses/upload/' + data.id;
-                    },
-                    headers: {
-                        'X-CSRF-TOKEN': token
-                    }
-                },
-                fieldInfo: 'Filenames separated by commas',
+                type: 'upload'
             },
             {
                 label: 'Village:',
@@ -227,24 +207,6 @@
                 placeholder: 'Select a village',
             },
         ];
-
-        // let house_editor = new $.fn.dataTable.Editor({
-        //     ajax: {
-        //         type: "POST",
-        //         contentType: 'application/json',
-        //         url: "/api/houses/{id}",
-        //         headers: {
-        //             "X-CSRF-TOKEN": token,
-        //         },
-        //         data: function (d) {
-        //             return JSON.stringify(d);
-        //         },
-        //         dataSrc: 'data'
-        //     },
-        //     table: "#houses_table",
-        //     idSrc: "id",
-        //     fields: fields_def
-        // });
 
         let house_editor = new $.fn.dataTable.Editor({
             ajax: {
@@ -267,7 +229,7 @@
                         "X-CSRF-TOKEN": token,
                     },
                     data: function (d) {
-                        return JSON.stringify(d.data[Object.keys(d.data)[0]]);
+                        return JSON.stringify({data: d.data});
                     },
                 },
                 remove: {
