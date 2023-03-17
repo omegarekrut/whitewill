@@ -23,14 +23,17 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/houses', [HousesController::class, 'index']);
     Route::post('/houses/create', [HousesController::class, 'store']);
-    Route::post('/houses/{id}', [HousesController::class, 'update']);
-    Route::delete('/houses/{id}', [HousesController::class, 'destroy']);
-    Route::post('/houses/upload/{id}', [HousesController::class, 'upload']);
+    Route::post('/houses/update', [HousesController::class, 'update']);
+    Route::post('/houses/delete', [HousesController::class, 'destroy']);
+    Route::post('/houses/upload-image', [HousesController::class, 'upload']);
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/village', [VillagesController::class, 'index']);
+    Route::post('/village/list', [VillagesController::class, 'index_list']);
     Route::post('/village/create', [VillagesController::class, 'store']);
-    Route::put('/village/{id}', [VillagesController::class, 'update']);
-    Route::delete('/village/{id}', [VillagesController::class, 'destroy']);
+    Route::post('/village/update', [VillagesController::class, 'update']);
+    Route::post('/village/delete', [VillagesController::class, 'destroy']);
+    Route::post('/village/upload-image', [VillagesController::class, 'upload']);
+    Route::post('/village/upload-file', [VillagesController::class, 'upload_file']);
 });

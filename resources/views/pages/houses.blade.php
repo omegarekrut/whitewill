@@ -52,11 +52,11 @@
         $.ajax({
             type: "POST",
             contentType: 'application/json',
-            url: "/api/village",
+            url: "/api/village/list",
             headers: {
                 "X-CSRF-TOKEN": token,
             },
-            dataSrc: "",
+            dataSrc: "data",
             success: function (data) {
                 villages_array = $.map(data, function(item) {
                     return { label: item.name, value: item.id };
@@ -117,6 +117,13 @@
                 data: 'image_gallery',
                 title: 'Image Gallery',
                 orderable: false,
+                render: function ( file_id ) {
+                    return file_id ?
+                        '<img class="img-fluid" src="'+house_editor.file( 'files', file_id ).web_path+'"/>' :
+                        null;
+                },
+                defaultContent: "No image",
+                title: "Image"
             },
             {
                 data: 'village_id',
@@ -137,9 +144,18 @@
 
         let fields_def = [
             {
+                label: 'ID:',
+                name: 'id',
+                type: 'hidden',
+            },
+            {
                 label: 'Name:',
                 name: 'name',
                 type: 'text',
+                fieldInfo: 'Max 25 characters',
+                attr: {
+                    maxLength: 25
+                }
             },
             {
                 label: 'Price (RUB):',
@@ -147,6 +163,9 @@
                 type: 'text',
                 mask: "#",
                 fieldInfo: 'Price in RUB',
+                attr: {
+                    maxLength: 25
+                }
             },
             {
                 label: 'Price (USD):',
@@ -154,6 +173,9 @@
                 type: 'text',
                 mask: "#",
                 fieldInfo: 'Price in USD',
+                attr: {
+                    maxLength: 25
+                }
             },
             {
                 label: 'Default Currency:',
@@ -163,18 +185,27 @@
                     { label: 'RUB', value: 'RUB' },
                     { label: 'USD', value: 'USD' },
                 ],
+                attr: {
+                    maxLength: 3
+                }
             },
             {
                 label: 'Floors:',
                 name: 'floors',
                 type: 'text',
-                mask: "#"
+                mask: "#",
+                attr: {
+                    maxLength: 3
+                }
             },
             {
                 label: 'Bedrooms:',
                 name: 'bedrooms',
                 type: 'text',
-                mask: "#"
+                mask: "#",
+                attr: {
+                    maxLength: 2
+                }
             },
             {
                 label: 'Area (m²):',
@@ -182,6 +213,9 @@
                 type: 'text',
                 mask: "#",
                 fieldInfo: 'Area in square meters',
+                attr: {
+                    maxLength: 3
+                }
             },
             {
                 label: 'Object Type:',
@@ -197,7 +231,22 @@
             {
                 label: 'Image Gallery:',
                 name: 'image_gallery',
-                type: 'upload'
+                type: "upload",
+                noImageText: 'No image',
+                ajax: {
+                    type: "POST",
+                    url: "/api/houses/upload-image",
+                    headers: {
+                        "X-CSRF-TOKEN": token,
+                    },
+                    data: function (d) {
+                        return d;
+                    }
+                },
+                display: function ( file_id ) {
+                    return '<img class="img-fluid" src="'+house_editor.file( 'files', file_id ).web_path+'" />';
+                },
+                noImageText: 'No image'
             },
             {
                 label: 'Village:',
@@ -224,7 +273,7 @@
                 edit: {
                     type: "POST",
                     contentType: 'application/json',
-                    url: "/api/houses/_id_",
+                    url: "/api/houses/update",
                     headers: {
                         "X-CSRF-TOKEN": token,
                     },
@@ -233,9 +282,9 @@
                     },
                 },
                 remove: {
-                    type: "DELETE",
+                    type: "POST",
                     contentType: 'application/json',
-                    url: "/api/houses/_id_",
+                    url: "/api/houses/delete",
                     headers: {
                         "X-CSRF-TOKEN": token,
                     },
@@ -249,15 +298,13 @@
             fields: fields_def
         });
 
-
         let houses_table = $("#houses_table").DataTable({
             ajax: {
                 type: "POST",
                 url: "/api/houses",
                 headers: {
                     "X-CSRF-TOKEN": token,
-                },
-                dataSrc: "",
+                }
             },
             dom: "Bfrtip",
             responsive: true,

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FileData;
 use Illuminate\Http\Request;
 use App\Models\House;
 
@@ -10,9 +11,55 @@ class HousesController extends Controller
     public function index(Request $request)
     {
         $houses = House::all();
-
-        return response()->json($houses);
+        $fileData = FileData::all()->pluck(null, 'id')->toArray();
+        $responseArray = [
+            'data' => $houses,
+            'files' => [
+                'files' => $fileData,
+            ]
+        ];
+        return response()->json($responseArray);
     }
+
+    public function upload(Request $request)
+    {
+        $file = $request->file('upload');
+
+        $filename = $file->getClientOriginalName();
+        $path = 'images/houses/' . $filename;
+
+        $file->storeAs('public/' . $path);
+
+        // Save file data to the file_data table
+        $fileData = FileData::create([
+            'filename' => $filename,
+            'filesize' => $file->getSize(),
+            'web_path' => asset('storage/' . $path),
+            'system_path' => storage_path('app/public/' . $path),
+        ]);
+
+        $id = $fileData->id;
+
+        // Return the uploaded file details in the specified JSON format
+        return response()->json([
+            'files' => [
+                'files' => [
+                    $id => [
+                        'id' => $id,
+                        'filename' => $filename,
+                        'filesize' => $file->getSize(),
+                        'web_path' => asset('storage/' . $path),
+                        'system_path' => storage_path('app/public/' . $path),
+                    ],
+                ],
+            ],
+            'upload' => [
+                'id' => $id,
+            ],
+        ]);
+    }
+
+
 
     public function store(Request $request)
     {
@@ -23,56 +70,37 @@ class HousesController extends Controller
         return response()->json(['message' => 'House created successfully', 'data' => [$house]], 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        // Get the updated data for the row with the given ID
-        $data = $request->input('data.' . $id);
+        // Parse the JSON data from the request body
+        $jsonData = json_decode($request->getContent(), true);
 
-        // Check if the $data variable is not null
-        if (!$data) {
-            return response()->json(['error' => 'No data provided for the specified ID'], 400);
-        }
+        // Get the ID and updated data from the JSON data
+        $id = key($jsonData['data']);
+        $data = $jsonData['data'][$id];
 
         // Update the House model with the new data
         $house = House::findOrFail($id);
         $house->fill($data);
+
         $house->save();
 
         // Return a JSON response indicating success
         return response()->json(['message' => 'House updated successfully', 'data' => [$house]], 200);
     }
 
-
-    public function destroy($id)
+    public function destroy(Request $request)
     {
+        // Parse the JSON data from the request body
+        $jsonData = json_decode($request->getContent(), true);
+
+        // Get the ID from the JSON data
+        $id = $jsonData['id'];
+
+        // Delete the House model with the given ID
         $house = House::findOrFail($id);
         $house->delete();
 
         return response()->json(['message' => 'House deleted successfully'], 204);
     }
-
-    public function upload(Request $request)
-    {
-        $houseId = $request->input('id');
-        $house = House::findOrFail($houseId);
-
-        if ($request->hasFile('image_gallery')) {
-            $files = $request->file('image_gallery');
-            $filenames = [];
-
-            foreach ($files as $file) {
-                $filename = $file->getClientOriginalName();
-                $path = 'images/houses/' . $houseId . '/' . $filename;
-
-                $file->storeAs('public/' . $path);
-                $filenames[] = $path;
-            }
-
-            $house->image_gallery = implode(',', $filenames);
-            $house->save();
-        }
-
-        return response()->json(['message' => 'Images uploaded successfully', 'data' => $house]);
-    }
-
 }
